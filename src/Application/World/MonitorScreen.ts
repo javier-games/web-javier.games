@@ -184,7 +184,7 @@ export default class MonitorScreen extends EventEmitter {
 
         // Set iframe attributes
         // PROD
-        iframe.src = 'https://business.javier.games/';
+        iframe.src = 'https://bio.site/javiergarcia';
         /**
          * Use dev server is query params are present
          *
