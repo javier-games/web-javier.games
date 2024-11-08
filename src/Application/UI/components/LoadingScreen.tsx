@@ -207,7 +207,7 @@ const LoadingScreen: React.FC<LoadingProps> = () => {
                             <p>
                                 All Content Loaded, launching{' '}
                                 <b style={styles.green}>
-                                    'Javier García Portfolio Showcase'
+                                    'Javier García Site'
                                 </b>{' '}
                                 V1.0
                             </p>
