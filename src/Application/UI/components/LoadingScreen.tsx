@@ -170,15 +170,14 @@ const LoadingScreen: React.FC<LoadingProps> = () => {
                         </div>
                         <div style={styles.headerInfo}>
                             <p>Released: 2024/02/08</p>
-                            <p>HHBIOS (C)2024 Monogum High-Turbo, S.A. de C.V.,</p>
+                            <p>BIOS (C)2024 Monogum High-Turbo, S.A. de C.V.,</p>
                         </div>
                     </div>
                     <div style={styles.body} className="loading-screen-body">
-                        <p>HSP S13 2000-2022 Special UC131S</p>
+                        <p></p>
                         <div style={styles.spacer} />
                         {showBiosInfo && (
                             <>
-                                <p>HSP Showcase(tm) XX 113</p>
                                 <p>Checking RAM : {14000} OK</p>
                                 <div style={styles.spacer} />
                                 <div style={styles.spacer} />
@@ -239,7 +238,7 @@ const LoadingScreen: React.FC<LoadingProps> = () => {
                     <p>But do enjoy what I have done so far :)</p>
                     <div style={styles.spacer} />
                     <div style={styles.spacer} /> */}
-                    <p>Javier García - Portfolio</p>
+                    <p>Javier García Site</p>
                     {mobileWarning && (
                         <>
                             <br />
