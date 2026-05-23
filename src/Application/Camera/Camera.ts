@@ -44,6 +44,9 @@ export default class Camera extends EventEmitter {
     targetKeyframe: CameraKey | undefined;
     keyframes: { [key in CameraKey]: CameraKeyframeInstance };
 
+    // UIEventBus unsubscribe handles — call in destroy() when needed
+    private _unsubs: Array<() => void> = [];
+
     constructor() {
         super();
         this.application = new Application();
@@ -150,8 +153,7 @@ export default class Camera extends EventEmitter {
     }
 
     setFreeCamListeners() {
-        UIEventBus.on('freeCamToggle', (toggle: boolean) => {
-            // if (toggle === this.freeCam) return;
+        const unsub = UIEventBus.on('freeCamToggle', (toggle: boolean) => {
             if (toggle) {
                 this.transition(
                     CameraKey.ORBIT_CONTROLS_START,
@@ -161,7 +163,6 @@ export default class Camera extends EventEmitter {
                         this.instance.position.copy(
                             this.keyframes.orbitControlsStart.position
                         );
-
                         this.orbitControls.update();
                         this.freeCam = true;
                     }
@@ -179,12 +180,23 @@ export default class Camera extends EventEmitter {
                 document.getElementById('webgl').style.pointerEvents = 'none';
             }
         });
+        this._unsubs.push(unsub);
     }
 
     setPostLoadTransition() {
-        UIEventBus.on('loadingScreenDone', () => {
+        const unsub = UIEventBus.on('loadingScreenDone', () => {
             this.transition(CameraKey.IDLE, 2500, TWEEN.Easing.Exponential.Out);
         });
+        this._unsubs.push(unsub);
+    }
+
+    /**
+     * Removes all UIEventBus listeners registered by this camera.
+     * Call from Application.destroy() when tearing down the scene.
+     */
+    destroyListeners() {
+        this._unsubs.forEach((unsub) => unsub());
+        this._unsubs = [];
     }
 
     resize() {

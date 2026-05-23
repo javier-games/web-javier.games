@@ -12,16 +12,17 @@ const InterfaceUI: React.FC<InterfaceUIProps> = ({}) => {
     const interfaceRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        UIEventBus.on('loadingScreenDone', () => {
+        const unsubLoaded = UIEventBus.on('loadingScreenDone', () => {
             setLoading(false);
         });
 
-        // find element by id and set ref
         const element = document.getElementById('ui-interactive');
         if (element) {
             // @ts-ignore
             interfaceRef.current = element;
         }
+
+        return () => unsubLoaded();
     }, []);
 
     const initMouseDownHandler = () => {
@@ -39,19 +40,23 @@ const InterfaceUI: React.FC<InterfaceUIProps> = ({}) => {
     }, [loading, initLoad]);
 
     useEffect(() => {
-        UIEventBus.on('enterMonitor', () => {
+        const unsubEnter = UIEventBus.on('enterMonitor', () => {
             setVisible(false);
             setInitLoad(false);
             if (interfaceRef.current) {
                 interfaceRef.current.style.pointerEvents = 'none';
             }
         });
-        UIEventBus.on('leftMonitor', () => {
+        const unsubLeft = UIEventBus.on('leftMonitor', () => {
             setVisible(true);
             if (interfaceRef.current) {
                 interfaceRef.current.style.pointerEvents = 'auto';
             }
         });
+        return () => {
+            unsubEnter();
+            unsubLeft();
+        };
     }, []);
 
     return !loading ? (

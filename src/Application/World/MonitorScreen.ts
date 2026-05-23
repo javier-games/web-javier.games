@@ -140,12 +140,69 @@ export default class MonitorScreen extends EventEmitter {
         container.style.height = this.screenSize.height + 'px';
         container.style.opacity = '1';
         container.style.background = '#1d2e2f';
+        container.style.position = 'relative';
+
+        // Create fallback overlay (shown while loading and on error)
+        const fallback = document.createElement('div');
+        fallback.style.position = 'absolute';
+        fallback.style.top = '0';
+        fallback.style.left = '0';
+        fallback.style.width = '100%';
+        fallback.style.height = '100%';
+        fallback.style.display = 'flex';
+        fallback.style.flexDirection = 'column';
+        fallback.style.alignItems = 'center';
+        fallback.style.justifyContent = 'center';
+        fallback.style.color = '#00ff00';
+        fallback.style.fontFamily = 'monospace';
+        fallback.style.fontSize = '16px';
+        fallback.style.letterSpacing = '1px';
+        fallback.style.pointerEvents = 'none';
+        fallback.style.zIndex = '1';
+
+        const loadingText = document.createElement('p');
+        loadingText.textContent = 'CONNECTING...';
+        fallback.appendChild(loadingText);
+
+        // Error message (hidden initially, shown after timeout)
+        const errorText = document.createElement('p');
+        errorText.style.display = 'none';
+        errorText.style.marginTop = '16px';
+        errorText.style.color = '#aaaaaa';
+        errorText.textContent = 'Unable to connect.';
+        fallback.appendChild(errorText);
+
+        const fallbackLink = document.createElement('a');
+        fallbackLink.href = 'https://bio.site/javier.games';
+        fallbackLink.target = '_blank';
+        fallbackLink.rel = 'noopener noreferrer';
+        fallbackLink.textContent = '→ Open bio.site/javier.games';
+        fallbackLink.style.display = 'none';
+        fallbackLink.style.marginTop = '12px';
+        fallbackLink.style.color = '#4598ff';
+        fallbackLink.style.textDecoration = 'underline';
+        fallbackLink.style.cursor = 'pointer';
+        fallbackLink.style.pointerEvents = 'auto';
+        fallback.appendChild(fallbackLink);
+
+        container.appendChild(fallback);
+
+        // Timeout: if iframe hasn't loaded after 10s, show error state
+        const fallbackTimeout = setTimeout(() => {
+            loadingText.style.display = 'none';
+            errorText.style.display = 'block';
+            fallbackLink.style.display = 'block';
+        }, 10000);
 
         // Create iframe
         const iframe = document.createElement('iframe');
 
         // Bubble mouse move events to the main application, so we can affect the camera
         iframe.onload = () => {
+            // Hide the fallback overlay once loaded
+            clearTimeout(fallbackTimeout);
+            fallback.style.display = 'none';
+
             if (iframe.contentWindow) {
                 window.addEventListener('message', (event) => {
                     var evt = new CustomEvent(event.data.type, {

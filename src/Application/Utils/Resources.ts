@@ -7,7 +7,6 @@ import Loading from './Loading';
 
 export default class Resources extends EventEmitter {
     sources: Resource[];
-    // Not sure about this one
     items: {
         texture: { [name: string]: LoadedTexture };
         cubeTexture: { [name: string]: LoadedCubeTexture };
@@ -50,36 +49,62 @@ export default class Resources extends EventEmitter {
     }
 
     startLoading() {
-        // Load each source
         for (const source of this.sources) {
             if (source.type === 'gltfModel') {
-                this.loaders.gltfLoader.load(source.path, (file) => {
-                    this.sourceLoaded(source, file);
-                });
+                this.loaders.gltfLoader.load(
+                    source.path,
+                    (file) => this.sourceLoaded(source, file),
+                    undefined,
+                    (error) => this.sourceFailed(source, error)
+                );
             } else if (source.type === 'texture') {
-                this.loaders.textureLoader.load(source.path, (file) => {
-                    file.encoding = THREE.sRGBEncoding;
-                    this.sourceLoaded(source, file);
-                });
+                this.loaders.textureLoader.load(
+                    source.path,
+                    (file) => {
+                        file.encoding = THREE.sRGBEncoding;
+                        this.sourceLoaded(source, file);
+                    },
+                    undefined,
+                    (error) => this.sourceFailed(source, error)
+                );
             } else if (source.type === 'cubeTexture') {
-                this.loaders.cubeTextureLoader.load(source.path, (file) => {
-                    this.sourceLoaded(source, file);
-                });
+                this.loaders.cubeTextureLoader.load(
+                    source.path,
+                    (file) => this.sourceLoaded(source, file),
+                    undefined,
+                    (error) => this.sourceFailed(source, error)
+                );
             } else if (source.type === 'audio') {
-                this.loaders.audioLoader.load(source.path, (buffer) => {
-                    this.sourceLoaded(source, buffer);
-                });
+                this.loaders.audioLoader.load(
+                    source.path,
+                    (buffer) => this.sourceLoaded(source, buffer),
+                    undefined,
+                    (error) => this.sourceFailed(source, error)
+                );
             }
         }
     }
 
     sourceLoaded(source: Resource, file: LoadedResource) {
         this.items[source.type][source.name] = file;
+        this.advance(source.name);
+    }
 
+    sourceFailed(source: Resource, error: unknown) {
+        console.error(`[Resources] Failed to load "${source.name}":`, error);
+        UIEventBus.dispatch('loadError', {
+            sourceName: source.name,
+            error,
+        });
+        // Still advance progress so the site is never permanently stuck
+        this.advance(source.name);
+    }
+
+    private advance(sourceName: string) {
         this.loaded++;
 
         this.loading.trigger('loadedSource', [
-            source.name,
+            sourceName,
             this.loaded,
             this.toLoad,
         ]);

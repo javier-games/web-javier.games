@@ -32,12 +32,18 @@ const HelpPrompt: React.FC<HelpPromptProps> = () => {
         setTimeout(() => {
             typeHelpText(0, '');
         }, 500);
-        document.addEventListener('mousedown', () => {
+
+        const onMouseDown = () => setVisible(false);
+        document.addEventListener('mousedown', onMouseDown);
+
+        const unsubEnter = UIEventBus.on('enterMonitor', () => {
             setVisible(false);
         });
-        UIEventBus.on('enterMonitor', () => {
-            setVisible(false);
-        });
+
+        return () => {
+            document.removeEventListener('mousedown', onMouseDown);
+            unsubEnter();
+        };
     }, []);
 
     useEffect(() => {
