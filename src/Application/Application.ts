@@ -100,6 +100,7 @@ export default class Application {
     destroy() {
         this.sizes.off('resize');
         this.time.off('tick');
+        this.camera.destroyListeners();
 
         // Traverse the whole scene
         this.scene.traverse((child) => {

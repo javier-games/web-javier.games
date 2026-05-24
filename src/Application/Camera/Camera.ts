@@ -71,8 +71,7 @@ export default class Camera extends EventEmitter {
 
         document.addEventListener('mousedown', (event) => {
             event.preventDefault();
-            // @ts-ignore
-            if (event.target.id === 'prevent-click') return;
+            if ((event.target as HTMLElement).id === 'prevent-click') return;
             // print target and current keyframe
             if (
                 this.currentKeyframe === CameraKey.IDLE ||
@@ -167,8 +166,8 @@ export default class Camera extends EventEmitter {
                         this.freeCam = true;
                     }
                 );
-                // @ts-ignore
-                document.getElementById('webgl').style.pointerEvents = 'auto';
+                const webgl = document.getElementById('webgl');
+                if (webgl) webgl.style.pointerEvents = 'auto';
             } else {
                 this.freeCam = false;
                 this.transition(
@@ -176,8 +175,8 @@ export default class Camera extends EventEmitter {
                     4000,
                     TWEEN.Easing.Exponential.Out
                 );
-                // @ts-ignore
-                document.getElementById('webgl').style.pointerEvents = 'none';
+                const webgl = document.getElementById('webgl');
+                if (webgl) webgl.style.pointerEvents = 'none';
             }
         });
         this._unsubs.push(unsub);

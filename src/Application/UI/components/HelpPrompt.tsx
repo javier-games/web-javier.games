@@ -1,7 +1,7 @@
-import React, { useCallback, useEffect, useRef, useState } from 'react';
-// import eventBus from '../EventBus';
+import React, { useEffect, useRef, useState } from 'react';
 import { motion } from 'framer-motion';
 import UIEventBus from '../EventBus';
+import { useTypewriter } from '../hooks/useTypewriter';
 
 const HELP_TEXT = 'Click anywhere to begin';
 
@@ -12,25 +12,16 @@ const HelpPrompt: React.FC<HelpPromptProps> = () => {
     const [visible, setVisible] = useState(true);
     const visRef = useRef(visible);
 
-    const typeHelpText = (i: number, curText: string) => {
-        if (i < HELP_TEXT.length && visRef.current) {
-            setTimeout(() => {
-                window.postMessage(
-                    { type: 'keydown', key: `_AUTO_${HELP_TEXT[i]}` },
-                    '*'
-                );
-
-                setHelpText(curText + HELP_TEXT[i]);
-                typeHelpText(i + 1, curText + HELP_TEXT[i]);
-            }, Math.random() * 120 + 50);
-        }
-    };
-
-    // make a document listener to listen to clicks
+    const typeHelpText = useTypewriter(setHelpText, {
+        minDelay: 50,
+        maxDelay: 170,
+        visRef,
+        stopWhenHidden: true,
+    });
 
     useEffect(() => {
         setTimeout(() => {
-            typeHelpText(0, '');
+            typeHelpText(HELP_TEXT);
         }, 500);
 
         const onMouseDown = () => setVisible(false);
@@ -96,8 +87,6 @@ const styles: StyleSheetCSS = {
         alignItems: 'flex-end',
     },
     blinkingContainer: {
-        // width: 100,
-        // height: 100,
         marginLeft: 8,
         paddingBottom: 2,
         paddingRight: 4,
