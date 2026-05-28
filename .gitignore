@@ -1,6 +1,77 @@
-node_modules
-package-lock.json
-.DS_Store
-*.psd
+# ─── Dependencies ────────────────────────────────────────────────────────────
+node_modules/
 
+# ─── Build output ────────────────────────────────────────────────────────────
 public/
+dist/
+build/
+out/
+
+# ─── Webpack cache ───────────────────────────────────────────────────────────
+.cache/
+.webpack/
+*.webpack.js
+
+# ─── TypeScript ──────────────────────────────────────────────────────────────
+*.tsbuildinfo
+
+# ─── Environment & secrets ───────────────────────────────────────────────────
+.env
+.env.*
+!.env.example
+
+# ─── Logs ────────────────────────────────────────────────────────────────────
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ─── Lock files (keep package-lock.json if you want reproducible installs) ───
+# package-lock.json
+yarn.lock
+
+# ─── OS files ────────────────────────────────────────────────────────────────
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+*.lnk
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.Spotlight-V100
+.Trashes
+
+# Linux
+*~
+
+# ─── Editor & IDE ────────────────────────────────────────────────────────────
+# VS Code
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+
+# JetBrains (IntelliJ, WebStorm, Rider, etc.)
+.idea/
+*.iml
+*.iws
+*.ipr
+
+# Vim / Emacs
+*.swp
+*.swo
+.*.swp
+\#*\#
+/.emacs.desktop
+/.emacs.desktop.lock
+
+# ─── Miscellaneous ───────────────────────────────────────────────────────────
+*.psd
+*.map
