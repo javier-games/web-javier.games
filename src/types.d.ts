@@ -58,4 +58,4 @@ type LoadedCubeTexture = THREE.CubeTexture;
 
 type LoadedAudio = AudioBuffer;
 
-type ResourceType = 'texture' | 'cubeTexture' | 'gltfModel';
+type ResourceType = 'texture' | 'cubeTexture' | 'gltfModel' | 'audio';

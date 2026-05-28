@@ -19,18 +19,17 @@ const LoadingScreen: React.FC<LoadingProps> = () => {
     const [firefoxError, setFirefoxError] = useState(false);
     const [webGLError, setWebGLError] = useState(false);
     const [counter, setCounter] = useState(0);
-    const [resources] = useState<string[]>([]);
+    const [resources, setResources] = useState<string[]>([]);
     const [mobileWarning, setMobileWarning] = useState(window.innerWidth < 768);
 
     const onResize = () => {
-        if (window.innerWidth < 768) {
-            setMobileWarning(true);
-        } else {
-            setMobileWarning(false);
-        }
+        setMobileWarning(window.innerWidth < 768);
     };
 
-    window.addEventListener('resize', onResize);
+    useEffect(() => {
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+    }, []);
 
     useEffect(() => {
         const urlParams = new URLSearchParams(window.location.search);
@@ -47,18 +46,18 @@ const LoadingScreen: React.FC<LoadingProps> = () => {
     }, []);
 
     useEffect(() => {
-        eventBus.on('loadedSource', (data) => {
+        return eventBus.on('loadedSource', (data) => {
             setProgress(data.progress);
             setToLoad(data.toLoad);
             setLoaded(data.loaded);
-            resources.push(
-                `Loaded ${data.sourceName}${getSpace(
-                    data.sourceName
-                )} ... ${Math.round(data.progress * 100)}%`
-            );
-            if (resources.length > 8) {
-                resources.shift();
-            }
+            const newEntry = `Loaded ${data.sourceName}${getSpace(
+                data.sourceName
+            )} ... ${Math.round(data.progress * 100)}%`;
+            setResources((prev) => {
+                const next = [...prev, newEntry];
+                if (next.length > 8) next.shift();
+                return next;
+            });
         });
     }, []);
 
@@ -402,7 +401,7 @@ const styles: StyleSheetCSS = {
     headerInfo: {
         marginLeft: 64,
     },
-    red: {
+    green: {
         color: '#00ff00',
     },
     link: {

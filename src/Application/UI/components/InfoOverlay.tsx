@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import FreeCamToggle from './FreeCamToggle';
 import MuteToggle from './MuteToggle';
+import { useTypewriter } from '../hooks/useTypewriter';
 
 interface InfoOverlayProps {
     visible: boolean;
@@ -8,7 +9,6 @@ interface InfoOverlayProps {
 
 const NAME_TEXT = 'Javier García';
 const TITLE_TEXT = 'Game Developer';
-const MULTIPLIER = 1;
 
 const InfoOverlay: React.FC<InfoOverlayProps> = ({ visible }) => {
     const visRef = useRef(visible);
@@ -21,57 +21,28 @@ const InfoOverlay: React.FC<InfoOverlayProps> = ({ visible }) => {
     const [volumeVisible, setVolumeVisible] = useState(false);
     const [freeCamVisible, setFreeCamVisible] = useState(false);
 
-    const typeText = (
-        i: number,
-        curText: string,
-        text: string,
-        setText: React.Dispatch<React.SetStateAction<string>>,
-        callback: () => void,
-        refOverride?: React.MutableRefObject<string>
-    ) => {
-        if (refOverride) {
-            text = refOverride.current;
-        }
-        if (i < text.length) {
-            setTimeout(() => {
-                if (visRef.current === true)
-                    window.postMessage(
-                        { type: 'keydown', key: `_AUTO_${text[i]}` },
-                        '*'
-                    );
+    const typewriterConfig = {
+        minDelay: 50,
+        maxDelay: 100,
+        visRef,
+        keyOnlyWhenVisible: true,
+    } as const;
 
-                setText(curText + text[i]);
-                typeText(
-                    i + 1,
-                    curText + text[i],
-                    text,
-                    setText,
-                    callback,
-                    refOverride
-                );
-            }, Math.random() * 50 + 50 * MULTIPLIER);
-        } else {
-            callback();
-        }
-    };
+    const typeNameText = useTypewriter(setNameText, typewriterConfig);
+    const typeTitleText = useTypewriter(setTitleText, typewriterConfig);
+    const typeTimeText = useTypewriter(setTimeText, {
+        ...typewriterConfig,
+        liveRef: timeRef,
+    });
 
     useEffect(() => {
         if (visible && nameText == '') {
             setTimeout(() => {
-                typeText(0, '', NAME_TEXT, setNameText, () => {
-                    typeText(0, '', TITLE_TEXT, setTitleText, () => {
-                        typeText(
-                            0,
-                            '',
-                            time,
-                            setTimeText,
-                            () => {
-                                setTextDone(true);
-                            },
-                            timeRef
-                        );
-                    });
-                });
+                typeNameText(NAME_TEXT, () =>
+                    typeTitleText(TITLE_TEXT, () =>
+                        typeTimeText(time, () => setTextDone(true))
+                    )
+                );
             }, 400);
         }
         visRef.current = visible;
@@ -163,8 +134,6 @@ const styles: StyleSheetCSS = {
         justifyContent: 'flex-start',
     },
     blinkingContainer: {
-        // width: 100,
-        // height: 100,
         marginLeft: 8,
         paddingBottom: 2,
         paddingRight: 4,

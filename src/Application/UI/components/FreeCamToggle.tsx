@@ -7,9 +7,9 @@ import camera from '../../../../static/textures/UI/camera.svg';
 // @ts-ignore
 import mouse from '../../../../static/textures/UI/mouse.svg';
 
-interface MuteToggleProps {}
+interface FreeCamToggleProps {}
 
-const MuteToggle: React.FC<MuteToggleProps> = ({}) => {
+const FreeCamToggle: React.FC<FreeCamToggleProps> = ({}) => {
     const [isHovering, setIsHovering] = useState(false);
     const [isActive, setIsActive] = useState(false);
     const [freeCamActive, setFreeCamActive] = useState(false);
@@ -163,4 +163,4 @@ const styles: StyleSheetCSS = {
     },
 };
 
-export default MuteToggle;
+export default FreeCamToggle;

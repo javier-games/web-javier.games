@@ -8,6 +8,11 @@ import Sizes from '../Utils/Sizes';
 import Camera from '../Camera/Camera';
 import EventEmitter from '../Utils/EventEmitter';
 
+/** MouseEvent extended with an inComputer flag set by the iframe event bridge. */
+interface MouseEventInComputer extends MouseEvent {
+    inComputer?: boolean;
+}
+
 const SCREEN_SIZE = { w: 1280, h: 1024 };
 const IFRAME_PADDING = 32;
 const IFRAME_SIZE = {
@@ -60,16 +65,13 @@ export default class MonitorScreen extends EventEmitter {
     initializeScreenEvents() {
         document.addEventListener(
             'mousemove',
-            (event) => {
-                // @ts-ignore
-                const id = event.target.id;
+            (event: MouseEventInComputer) => {
+                const id = (event.target as HTMLElement).id;
                 if (id === 'computer-screen') {
-                    // @ts-ignore
                     event.inComputer = true;
                 }
 
-                // @ts-ignore
-                this.inComputer = event.inComputer;
+                this.inComputer = event.inComputer ?? false;
 
                 if (this.inComputer && !this.prevInComputer) {
                     this.camera.trigger('enterMonitor');
@@ -101,9 +103,8 @@ export default class MonitorScreen extends EventEmitter {
         );
         document.addEventListener(
             'mousedown',
-            (event) => {
-                // @ts-ignore
-                this.inComputer = event.inComputer;
+            (event: MouseEventInComputer) => {
+                this.inComputer = event.inComputer ?? false;
                 this.application.mouse.trigger('mousedown', [event]);
 
                 this.mouseClickInProgress = true;
@@ -113,9 +114,8 @@ export default class MonitorScreen extends EventEmitter {
         );
         document.addEventListener(
             'mouseup',
-            (event) => {
-                // @ts-ignore
-                this.inComputer = event.inComputer;
+            (event: MouseEventInComputer) => {
+                this.inComputer = event.inComputer ?? false;
                 this.application.mouse.trigger('mouseup', [event]);
 
                 if (this.shouldLeaveMonitor) {
@@ -140,42 +140,55 @@ export default class MonitorScreen extends EventEmitter {
         container.style.height = this.screenSize.height + 'px';
         container.style.opacity = '1';
         container.style.background = '#1d2e2f';
+        container.style.position = 'relative';
+
+        // Fallback overlay shown while loading; switches to error state on timeout
+        const { element: fallback, hide: hideFallback, timeout: fallbackTimeout } =
+            this.createFallbackOverlay();
+        container.appendChild(fallback);
 
         // Create iframe
         const iframe = document.createElement('iframe');
 
         // Bubble mouse move events to the main application, so we can affect the camera
         iframe.onload = () => {
+            clearTimeout(fallbackTimeout);
+            hideFallback();
+
             if (iframe.contentWindow) {
                 window.addEventListener('message', (event) => {
-                    var evt = new CustomEvent(event.data.type, {
-                        bubbles: true,
-                        cancelable: false,
-                    });
+                    type BridgedEvent = CustomEvent & {
+                        inComputer: boolean;
+                        clientX?: number;
+                        clientY?: number;
+                        key?: string;
+                    };
 
-                    // @ts-ignore
-                    evt.inComputer = true;
+                    const extra: Partial<BridgedEvent> = { inComputer: true };
+
                     if (event.data.type === 'mousemove') {
-                        var clRect = iframe.getBoundingClientRect();
+                        const clRect = iframe.getBoundingClientRect();
                         const { top, left, width, height } = clRect;
-                        const widthRatio = width / IFRAME_SIZE.w;
-                        const heightRatio = height / IFRAME_SIZE.h;
-
-                        // @ts-ignore
-                        evt.clientX = Math.round(
-                            event.data.clientX * widthRatio + left
+                        extra.clientX = Math.round(
+                            event.data.clientX * (width / IFRAME_SIZE.w) + left
                         );
-                        //@ts-ignore
-                        evt.clientY = Math.round(
-                            event.data.clientY * heightRatio + top
+                        extra.clientY = Math.round(
+                            event.data.clientY * (height / IFRAME_SIZE.h) + top
                         );
-                    } else if (event.data.type === 'keydown') {
-                        // @ts-ignore
-                        evt.key = event.data.key;
-                    } else if (event.data.type === 'keyup') {
-                        // @ts-ignore
-                        evt.key = event.data.key;
+                    } else if (
+                        event.data.type === 'keydown' ||
+                        event.data.type === 'keyup'
+                    ) {
+                        extra.key = event.data.key;
                     }
+
+                    const evt = Object.assign(
+                        new CustomEvent(event.data.type, {
+                            bubbles: true,
+                            cancelable: false,
+                        }),
+                        extra
+                    ) as BridgedEvent;
 
                     iframe.dispatchEvent(evt);
                 });
@@ -186,9 +199,9 @@ export default class MonitorScreen extends EventEmitter {
         // PROD
         iframe.src = 'https://bio.site/javier.games';
         /**
-         * Use dev server is query params are present
+         * Use dev server when query param ?dev is present.
          *
-         * Warning: This will not work unless the dev server is running on localhost:3000
+         * Warning: This will not work unless the dev server is running on localhost:3000.
          * Also running the dev server causes browsers to freak out over unsecure connections
          * in the iframe, so it will flag a ton of issues.
          */
@@ -211,6 +224,79 @@ export default class MonitorScreen extends EventEmitter {
 
         // Create CSS plane
         this.createCssPlane(container);
+    }
+
+    /**
+     * Builds the loading/error overlay shown inside the monitor container while
+     * the iframe is connecting. Returns:
+     *   element — the overlay div to append to the container
+     *   hide    — call on successful iframe load to remove the overlay
+     *   timeout — the pending fallback timer (pass to clearTimeout on success)
+     */
+    private createFallbackOverlay(): {
+        element: HTMLDivElement;
+        hide: () => void;
+        timeout: ReturnType<typeof setTimeout>;
+    } {
+        const overlay = document.createElement('div');
+        Object.assign(overlay.style, {
+            position: 'absolute',
+            top: '0',
+            left: '0',
+            width: '100%',
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            color: '#00ff00',
+            fontFamily: 'monospace',
+            fontSize: '16px',
+            letterSpacing: '1px',
+            pointerEvents: 'none',
+            zIndex: '1',
+        });
+
+        const loadingText = document.createElement('p');
+        loadingText.textContent = 'CONNECTING...';
+        overlay.appendChild(loadingText);
+
+        const errorText = document.createElement('p');
+        Object.assign(errorText.style, {
+            display: 'none',
+            marginTop: '16px',
+            color: '#aaaaaa',
+        });
+        errorText.textContent = 'Unable to connect.';
+        overlay.appendChild(errorText);
+
+        const fallbackLink = document.createElement('a');
+        fallbackLink.href = 'https://bio.site/javier.games';
+        fallbackLink.target = '_blank';
+        fallbackLink.rel = 'noopener noreferrer';
+        fallbackLink.textContent = '→ Open bio.site/javier.games';
+        Object.assign(fallbackLink.style, {
+            display: 'none',
+            marginTop: '12px',
+            color: '#4598ff',
+            textDecoration: 'underline',
+            cursor: 'pointer',
+            pointerEvents: 'auto',
+        });
+        overlay.appendChild(fallbackLink);
+
+        // After 10 s with no load event, surface the direct link
+        const timeout = setTimeout(() => {
+            loadingText.style.display = 'none';
+            errorText.style.display = 'block';
+            fallbackLink.style.display = 'block';
+        }, 10000);
+
+        return {
+            element: overlay,
+            hide: () => { overlay.style.display = 'none'; },
+            timeout,
+        };
     }
 
     /**
