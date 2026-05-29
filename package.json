@@ -32,7 +32,7 @@
         "html-webpack-plugin": "^5.5.0",
         "lil-gui": "^0.16.0",
         "mini-css-extract-plugin": "^2.5.3",
-        "nodemailer": "^6.9.16",
+        "nodemailer": "^8.0.9",
         "portfinder-sync": "0.0.2",
         "raw-loader": "^4.0.2",
         "react": "^17.0.2",
