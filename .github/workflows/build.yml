@@ -6,6 +6,10 @@ on:
   pull_request:
     branches: [ "master" ]
 
+concurrency:
+  group: deploy-gh-pages
+  cancel-in-progress: false
+
 jobs:
  
   build:
@@ -30,6 +34,7 @@ jobs:
       run: CI=false npm run build
 
     - name: Deploy to GitHub Pages
+      if: github.event_name == 'push'
       uses: JamesIves/github-pages-deploy-action@v4
       with:
         branch: gh-pages
