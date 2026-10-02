@@ -17,18 +17,22 @@ export class CameraKeyframeInstance {
     update() {}
 }
 
+// World size and depth of the monitor screen (see MonitorScreen) and the camera FOV
+const MONITOR = { w: 2464, h: 1272, z: -117 };
+const FOV = 35;
+
 const keys: { [key in CameraKey]: CameraKeyframe } = {
     idle: {
         position: new THREE.Vector3(-20000, 12000, 20000),
         focalPoint: new THREE.Vector3(0, -1000, 0),
     },
     monitor: {
-        position: new THREE.Vector3(0, 950, 2000),
-        focalPoint: new THREE.Vector3(0, 950, 0),
+        position: new THREE.Vector3(-357, 914, 2000),
+        focalPoint: new THREE.Vector3(-357, 914, MONITOR.z),
     },
     desk: {
-        position: new THREE.Vector3(0, 1800, 5500),
-        focalPoint: new THREE.Vector3(0, 500, 0),
+        position: new THREE.Vector3(-357, 1800, 5500),
+        focalPoint: new THREE.Vector3(-357, 500, 0),
     },
     loading: {
         position: new THREE.Vector3(-35000, 35000, 35000),
@@ -56,9 +60,11 @@ export class MonitorKeyframe extends CameraKeyframeInstance {
     }
 
     update() {
+        // Pull back until the whole screen fits, whichever side limits it
         const aspect = this.sizes.height / this.sizes.width;
-        const additionalZoom = this.sizes.width < 768 ? 0 : 600;
-        this.targetPos.z = this.origin.z + aspect * 1200 - additionalZoom;
+        const fit = Math.max(MONITOR.h * 1.12, MONITOR.w * 1.04 * aspect);
+        this.targetPos.z =
+            MONITOR.z + fit / (2 * Math.tan((FOV / 2) * THREE.MathUtils.DEG2RAD));
         this.position.copy(this.targetPos);
     }
 }
@@ -92,13 +98,13 @@ export class DeskKeyframe extends CameraKeyframeInstance {
     }
 
     update() {
-        this.targetFoc.x +=
-            (this.mouse.x - this.sizes.width / 2 - this.targetFoc.x) * 0.05;
+        const mouseX = this.origin.x + this.mouse.x - this.sizes.width / 2;
+
+        this.targetFoc.x += (mouseX - this.targetFoc.x) * 0.05;
         this.targetFoc.y +=
             (-(this.mouse.y - this.sizes.height) - this.targetFoc.y) * 0.05;
 
-        this.targetPos.x +=
-            (this.mouse.x - this.sizes.width / 2 - this.targetPos.x) * 0.025;
+        this.targetPos.x += (mouseX - this.targetPos.x) * 0.025;
         this.targetPos.y +=
             (-(this.mouse.y - this.sizes.height * 2) - this.targetPos.y) *
             0.025;

@@ -48,7 +48,7 @@ export default class CoffeeSteam {
             this.model.material
         );
 
-        this.model.mesh.position.copy(new THREE.Vector3(1670, 200, 900));
+        this.model.mesh.position.copy(new THREE.Vector3(1670, 592, 900));
 
         this.scene.add(this.model.mesh);
     }

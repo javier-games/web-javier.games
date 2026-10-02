@@ -13,7 +13,9 @@ interface MouseEventInComputer extends MouseEvent {
     inComputer?: boolean;
 }
 
-const SCREEN_SIZE = { w: 1280, h: 1024 };
+const SCREEN_SIZE = { w: 1984, h: 1024 };
+// The iframe is scaled up so it fills the terminal's whole screen bay
+const SCREEN_SCALE = 1.242;
 const IFRAME_PADDING = 32;
 const IFRAME_SIZE = {
     w: SCREEN_SIZE.w - IFRAME_PADDING,
@@ -46,10 +48,13 @@ export default class MonitorScreen extends EventEmitter {
         this.cssScene = this.application.cssScene;
         this.sizes = this.application.sizes;
         this.resources = this.application.resources;
-        this.screenSize = new THREE.Vector2(SCREEN_SIZE.w, SCREEN_SIZE.h);
+        this.screenSize = new THREE.Vector2(
+            SCREEN_SIZE.w * SCREEN_SCALE,
+            SCREEN_SIZE.h * SCREEN_SCALE
+        );
         this.camera = this.application.camera;
-        this.position = new THREE.Vector3(0, 950, 255);
-        this.rotation = new THREE.Euler(-3 * THREE.MathUtils.DEG2RAD, 0, 0);
+        this.position = new THREE.Vector3(-357, 914, -117);
+        this.rotation = new THREE.Euler(0, 0, 0);
         this.videoTextures = {};
         this.mouseClickInProgress = false;
         this.shouldLeaveMonitor = false;
@@ -136,8 +141,8 @@ export default class MonitorScreen extends EventEmitter {
     createIframe() {
         // Create container
         const container = document.createElement('div');
-        container.style.width = this.screenSize.width + 'px';
-        container.style.height = this.screenSize.height + 'px';
+        container.style.width = SCREEN_SIZE.w + 'px';
+        container.style.height = SCREEN_SIZE.h + 'px';
         container.style.opacity = '1';
         container.style.background = '#1d2e2f';
         container.style.position = 'relative';
@@ -209,8 +214,8 @@ export default class MonitorScreen extends EventEmitter {
         if (urlParams.has('dev')) {
             iframe.src = 'http://localhost:3000/';
         }
-        iframe.style.width = this.screenSize.width + 'px';
-        iframe.style.height = this.screenSize.height + 'px';
+        iframe.style.width = SCREEN_SIZE.w + 'px';
+        iframe.style.height = SCREEN_SIZE.h + 'px';
         iframe.style.padding = IFRAME_PADDING + 'px';
         iframe.style.boxSizing = 'border-box';
         iframe.style.opacity = '1';
@@ -310,6 +315,7 @@ export default class MonitorScreen extends EventEmitter {
         // copy monitor position and rotation
         object.position.copy(this.position);
         object.rotation.copy(this.rotation);
+        object.scale.setScalar(SCREEN_SCALE);
 
         // Add to CSS scene
         this.cssScene.add(object);
@@ -323,10 +329,7 @@ export default class MonitorScreen extends EventEmitter {
         material.blending = THREE.NoBlending;
 
         // Create plane geometry
-        const geometry = new THREE.PlaneGeometry(
-            this.screenSize.width,
-            this.screenSize.height
-        );
+        const geometry = new THREE.PlaneGeometry(SCREEN_SIZE.w, SCREEN_SIZE.h);
 
         // Create the GL plane mesh
         const mesh = new THREE.Mesh(geometry, material);
@@ -526,7 +529,7 @@ export default class MonitorScreen extends EventEmitter {
     createEnclosingPlane(plane: EnclosingPlane) {
         const material = new THREE.MeshBasicMaterial({
             side: THREE.DoubleSide,
-            color: 0x48493f,
+            color: 0x101010,
         });
 
         const geometry = new THREE.PlaneGeometry(plane.size.x, plane.size.y);

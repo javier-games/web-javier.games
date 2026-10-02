@@ -23,7 +23,7 @@ export class ComputerAudio extends AudioSource {
             if (event.inComputer) {
                 this.manager.playAudio('mouseDown', {
                     volume: 0.8,
-                    position: new THREE.Vector3(800, -300, 1200),
+                    position: new THREE.Vector3(800, 90, 1200),
                 });
             }
         });
@@ -33,7 +33,7 @@ export class ComputerAudio extends AudioSource {
             if (event.inComputer) {
                 this.manager.playAudio('mouseUp', {
                     volume: 0.8,
-                    position: new THREE.Vector3(800, -300, 1200),
+                    position: new THREE.Vector3(800, 90, 1200),
                 });
             }
         });
@@ -61,7 +61,7 @@ export class ComputerAudio extends AudioSource {
             if (event.inComputer) {
                 this.manager.playAudio('keyboardKeydown', {
                     volume: 0.8,
-                    position: new THREE.Vector3(-300, -400, 1200),
+                    position: new THREE.Vector3(-540, 0, 1100),
                 });
             }
         });
