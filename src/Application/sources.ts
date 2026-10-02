@@ -20,6 +20,26 @@ const sources: Resource[] = [
         path: 'models/World/baked_environment.jpg',
     },
     {
+        name: 'rockModel',
+        type: 'gltfModel',
+        path: 'models/World/rock.glb',
+    },
+    {
+        name: 'rockTexture',
+        type: 'texture',
+        path: 'models/World/baked_rock.jpg',
+    },
+    {
+        name: 'exteriorModel',
+        type: 'gltfModel',
+        path: 'models/World/exterior.glb',
+    },
+    {
+        name: 'exteriorTexture',
+        type: 'texture',
+        path: 'models/World/baked_exterior.jpg',
+    },
+    {
         name: 'decorModel',
         type: 'gltfModel',
         path: 'models/Decor/decor.glb',

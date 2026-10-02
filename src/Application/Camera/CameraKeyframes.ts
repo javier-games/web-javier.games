@@ -129,8 +129,9 @@ export class IdleKeyframe extends CameraKeyframeInstance {
     }
 
     update() {
+        // Sweep from the open left side up to the window wall, never past it
         this.position.x =
-            Math.sin((this.time.elapsed + 19000) * 0.00008) * this.origin.x;
+            Math.sin((this.time.elapsed + 19000) * 0.00008) * 14500 - 5500;
         this.position.y =
             Math.sin((this.time.elapsed + 1000) * 0.000004) * 4000 +
             this.origin.y -

@@ -7,7 +7,7 @@ export default class Environment {
     application: Application;
     scene: THREE.Scene;
     resources: Resources;
-    bakedModel: BakedModel;
+    bakedModels: BakedModel[];
 
     constructor() {
         this.application = new Application();
@@ -19,15 +19,28 @@ export default class Environment {
     }
 
     bakeModel() {
-        this.bakedModel = new BakedModel(
-            this.resources.items.gltfModel.environmentModel,
-            this.resources.items.texture.environmentTexture,
-            900
-        );
+        const { gltfModel, texture } = this.resources.items;
+
+        // Room, rock face and the sea/sky backdrop each carry their own baked texture
+        this.bakedModels = [
+            new BakedModel(
+                gltfModel.environmentModel,
+                texture.environmentTexture,
+                900
+            ),
+            new BakedModel(gltfModel.rockModel, texture.rockTexture, 900),
+            new BakedModel(
+                gltfModel.exteriorModel,
+                texture.exteriorTexture,
+                900
+            ),
+        ];
     }
 
     setModel() {
-        this.scene.add(this.bakedModel.getModel());
+        for (const bakedModel of this.bakedModels) {
+            this.scene.add(bakedModel.getModel());
+        }
     }
 
     update() {}
