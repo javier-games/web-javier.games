@@ -220,6 +220,9 @@ export default class Camera extends EventEmitter {
         );
         this.orbitControls.dampingFactor = 0.05;
         this.orbitControls.maxPolarAngle = Math.PI / 2;
+        // Keep the free camera inside the set: not behind the rock, not past the window
+        this.orbitControls.minAzimuthAngle = -Math.PI / 2;
+        this.orbitControls.maxAzimuthAngle = Math.PI * 0.12;
         this.orbitControls.minDistance = 4000;
         this.orbitControls.maxDistance = 29000;
 
