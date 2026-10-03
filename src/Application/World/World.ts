@@ -3,8 +3,6 @@ import Resources from '../Utils/Resources';
 import ComputerSetup from './Computer';
 import MonitorScreen from './MonitorScreen';
 import Environment from './Environment';
-import Decor from './Decor';
-import CoffeeSteam from './CoffeeSteam';
 import AudioManager from '../Audio/AudioManager';
 export default class World {
     application: Application;
@@ -13,10 +11,8 @@ export default class World {
 
     // Objects in the scene
     environment: Environment;
-    decor: Decor;
     computerSetup: ComputerSetup;
     monitorScreen: MonitorScreen;
-    coffeeSteam: CoffeeSteam;
     audioManager: AudioManager;
 
     constructor() {
@@ -27,10 +23,8 @@ export default class World {
         this.resources.on('ready', () => {
             // Setup
             this.environment = new Environment();
-            this.decor = new Decor();
             this.computerSetup = new ComputerSetup();
             this.monitorScreen = new MonitorScreen();
-            this.coffeeSteam = new CoffeeSteam();
             this.audioManager = new AudioManager();
         });
     }
@@ -38,7 +32,6 @@ export default class World {
     update() {
         if (this.monitorScreen) this.monitorScreen.update();
         if (this.environment) this.environment.update();
-        if (this.coffeeSteam) this.coffeeSteam.update();
         if (this.audioManager) this.audioManager.update();
     }
 }

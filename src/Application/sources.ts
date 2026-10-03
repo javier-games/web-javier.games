@@ -40,14 +40,19 @@ const sources: Resource[] = [
         path: 'models/World/baked_exterior.jpg',
     },
     {
-        name: 'decorModel',
+        name: 'propsModel',
         type: 'gltfModel',
-        path: 'models/Decor/decor.glb',
+        path: 'models/Props/props.glb',
     },
     {
-        name: 'decorTexture',
+        name: 'propsTexture',
         type: 'texture',
-        path: 'models/Decor/baked_decor_modified.jpg',
+        path: 'models/Props/baked_props.jpg',
+    },
+    {
+        name: 'glassModel',
+        type: 'gltfModel',
+        path: 'models/Props/glass.glb',
     },
     {
         name: 'monitorSmudgeTexture',
