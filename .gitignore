@@ -72,6 +72,9 @@ $RECYCLE.BIN/
 /.emacs.desktop
 /.emacs.desktop.lock
 
+# ─── Blender source of the 3D assets (local only; bake.sh writes static/models) ─
+/blender/
+
 # ─── Miscellaneous ───────────────────────────────────────────────────────────
 *.psd
 *.map
